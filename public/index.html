@@ -1,0 +1,714 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/css/bootstrap-combined.min.css" rel="stylesheet">
+    <script src="https://static.opentok.com/v2/js/opentok.min.js"></script>
+    <style>
+
+        * {box-sizing: border-box}
+        body {font-family: "Lato", sans-serif; Arial;}
+
+        /* Style the tab */
+        .tab {
+            overflow: hidden;
+            border: 1px solid #ccc;
+            background-color: #f1f1f1;
+        }
+
+        /* Style the buttons inside the tab */
+        .tab button {
+            background-color: inherit;
+            float: left;
+            border: none;
+            outline: none;
+            cursor: pointer;
+            padding: 14px 16px;
+            transition: 0.3s;
+            font-size: 17px;
+        }
+
+        /* Change background color of buttons on hover */
+        .tab button:hover {
+            background-color: #ddd;
+        }
+
+        /* Create an active/current tablink class */
+        .tab button.active {
+            background-color: #ccc;
+        }
+
+        /* Style the tab content */
+        .tabcontent {
+            display: none;
+            padding: 5px 10px;
+            border: 1px solid #ccc;
+            border-top: none;
+            height: 510px;
+        }
+
+        /* Style the tab -----------------------------*/
+        .tab-ver {
+            float: left;
+/*
+            border: 1px solid #ccc;
+            background-color: #f1f1f1;
+*/
+            width: 15%;
+        }
+
+        /* Style the buttons inside the tab */
+        .tab-ver button {
+            display: flex;
+            background-color: inherit;
+            color: black;
+            padding: 22px 16px;
+            width: 100%;
+            border: none;
+            outline: none;
+            text-align: left;
+            cursor: pointer;
+            transition: 0.3s;
+            font-size: 17px;
+        }
+
+        /* Change background color of buttons on hover */
+        .tab-ver button:hover {
+            background-color: #ddd;
+        }
+
+        /* Create an active/current "tab button" class */
+        .tab-ver button.active {
+            background-color: #ccc;
+        }
+
+        /* Style the tab content */
+        .tabcontent-ver {
+            float: left;
+            padding: 0px 12px;
+            width: 80%;
+            border-left: none;
+            height: 500px;
+            display: none;
+        }
+
+        .avatar {
+            vertical-align: middle;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+        }
+        .avatar-name {
+            padding: 12px;
+        }
+        #login {
+            text-align: center;
+            border: 3px solid #f1f1f1;
+        }
+        #room-mng {
+            text-align: center;
+            display: none;
+        }
+        input[type=text], input[type=password] {
+            width: 40%;
+            padding: 12px 20px;
+            margin: 8px 0;
+            display: inline-block;
+            border: 1px solid #ccc;
+            box-sizing: border-box;
+        }
+        .submit, button[type=submit] {
+            background-color: #2196F3;
+            color: white;
+            padding: 14px 20px;
+            margin: 8px 0;
+            border: none;
+            cursor: pointer;
+            width: 40%;
+            margin-left: 80px;
+        }
+
+        button[type=submit]:hover {
+            opacity: 0.8;
+        }
+
+        .submit:hover {
+            opacity: 0.7;
+        }
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 60px;
+            height: 34px;
+            margin: 5px;
+        }
+
+        .switch input {display:none;}
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #cc5100;
+            -webkit-transition: .4s;
+            transition: .4s;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 26px;
+            width: 26px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            -webkit-transition: .4s;
+            transition: .4s;
+        }
+
+        input:checked + .slider {
+            background-color: #2196F3;
+        }
+
+        input:focus + .slider {
+            box-shadow: 0 0 1px #2196F3;
+        }
+
+        input:checked + .slider:before {
+            -webkit-transform: translateX(26px);
+            -ms-transform: translateX(26px);
+            transform: translateX(26px);
+        }
+
+        /* Rounded sliders */
+        .slider.round {
+            border-radius: 34px;
+        }
+
+        .slider.round:before {
+            border-radius: 50%;
+        }
+        /* vertical line */
+        .vl {
+            position: absolute;
+            left: 50%;
+            top: 25%;
+            transform: translate(-50%);
+            border: 2px solid #ddd;
+            height: 175px;
+            z-index: 10;
+        }
+
+        /* text inside the vertical line */
+        .vl-innertext {
+            position: absolute;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            background-color: #f1f1f1;
+            border: 1px solid #ccc;
+            border-radius: 50%;
+            padding: 8px 10px;
+        }
+        /* drop down button */
+        .dropbtn {
+            background-color: #4CAF50;
+            color: white;
+            padding: 16px;
+            font-size: 16px;
+            border: none;
+            cursor: pointer;
+        }
+
+        .dropdown {
+            position: relative;
+            display: inline-block;
+        }
+
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            background-color: #f9f9f9;
+            min-width: 160px;
+            box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+            z-index: 1;
+        }
+
+        .dropdown-content a {
+            color: black;
+            padding: 12px 16px;
+            text-decoration: none;
+            display: block;
+        }
+
+        .dropdown-content a:hover {background-color: #f1f1f1}
+
+        .dropdown:hover .dropdown-content {
+            display: block;
+        }
+
+        .dropdown:hover .dropbtn {
+            background-color: #3e8e41;
+        }
+
+        .chip {
+            display: block;
+            padding: 0 25px;
+            height: 50px;
+            font-size: 18px;
+            line-height: 50px;
+            border-radius: 25px;
+            background-color: #f1f1f1;
+            margin-top: 10px;
+        }
+
+        .chip:hover {
+            background-color: #ddd;
+        }
+
+        .chip img {
+            float: left;
+            margin: 0 10px 0 -25px;
+            height: 50px;
+            width: 50px;
+            border-radius: 50%;
+        }
+
+        .closebtn {
+            padding-left: 20px;
+            margin-top: -50px;
+            color: #888;
+            font-weight: bold;
+            float: right;
+            font-size: 20px;
+            cursor: pointer;
+        }
+
+        .closebtn:hover {
+            color: #000;
+        }
+
+        .grid {
+            display: -webkit-box;
+            display: -ms-flexbox;
+            display: flex;
+            -webkit-box-orient: horizontal;
+            -webkit-box-direction: normal;
+            -ms-flex-direction: row;
+            flex-direction: row;
+            -ms-flex-wrap: wrap;
+            flex-wrap: wrap;
+            -webkit-box-align: stretch;
+            -ms-flex-align: stretch;
+            align-items: stretch;
+            padding: 0;
+            visibility: hidden;
+        }
+    </style>
+    <script>
+        var logicFsm = null
+        var users = null
+        var rooms = null
+        var user = {
+            sex: true,
+            owner: {}
+        }
+        var uinCall = []
+
+        Array.prototype.diff = function(a) {
+            return this.filter(function(i) {return a.indexOf(i) < 0;});
+        }
+
+        function makeid(n) {
+            var text = "";
+            var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+            for (var i = 0; i < n; i++)
+                text += possible.charAt(Math.floor(Math.random() * possible.length));
+            return text;
+        }
+        function dynamicallyLoadScript(url) {
+            var script = document.createElement("script"); //Make a script DOM node
+            script.src = url; //Set it's src to the provided URL
+            document.head.appendChild(script); //Add it to the end of the head section of the page (could change 'head' to 'body' to add it to the end of the body section instead)
+        }
+        function  updateUsers(list) {
+            var usr
+               ,usrs = document.getElementById('users-list')
+            while (usrs && usrs.hasChildNodes()) {
+                usrs.removeChild(usrs.lastChild);
+            }
+            users = list ? list : users
+            var dif = users.diff(uinCall)
+            dif.forEach(item => {
+                if (item !== user.name && usrs) {
+                    usr = document.createElement('a')
+                    usr.href = '#'
+                    usr.textContent = item
+                    usr.onclick = function () {
+                        if (logicFsm.state.name === 'connectState') {
+                            clogic.invite3rd(this.textContent)
+                        } else {
+                            clogic.makeCall(this.textContent, user.member)
+                        }
+                        //this.style.display = 'none'
+                        usrs.removeChild(this)
+                        uinCall.push(this.textContent)
+                    }
+                    usrs.appendChild(usr)
+                }
+            })
+        }
+        function updateRooms(roomsObj) {
+            let roomlist = []
+            rooms = roomsObj
+            for (const room in rooms) {
+                roomlist.push(room+'['+this.rooms.members.length+']')
+            }
+            updateRoomsList(roomlist)
+        }
+        function openRoom(evt, name) {
+            var i, tabcontent, tablinks;
+            tabcontent = document.getElementsByClassName("tabcontent");
+            for (i = 0; i < tabcontent.length; i++) {
+                tabcontent[i].style.display = "none";
+            }
+            tablinks = document.getElementsByClassName("tablinks");
+            for (i = 0; i < tablinks.length; i++) {
+                tablinks[i].className = tablinks[i].className.replace(" active", "");
+            }
+            document.getElementById(name).style.display = "block";
+            if (evt) {
+                evt.currentTarget.className += " active";
+            } else {
+                document.getElementById(name + '-tab').className += " active";
+            }
+        }
+
+        function openChat(evt, name) {
+            var i, tabcontent, tablinks;
+            tabcontent = document.getElementsByClassName("tabcontent-ver");
+            for (i = 0; i < tabcontent.length; i++) {
+                tabcontent[i].style.display = "none";
+            }
+            tablinks = document.getElementsByClassName("tablinks-ver");
+            for (i = 0; i < tablinks.length; i++) {
+                tablinks[i].className = tablinks[i].className.replace(" active", "");
+            }
+            document.getElementById(name).style.display = "block";
+            evt.currentTarget.className += " active";
+        }
+        function addRoom(name) {
+            if (document.getElementById(name) &&
+                document.getElementById(name+'-tab'))
+                return
+
+            var room = document.createElement('button')
+            room.id = name+'-tab'
+            room.className = 'tablinks'
+            room.textContent = name
+            room.onclick = function() { openRoom(event, name) }
+            document.getElementById('Rooms').appendChild(room)
+
+            var cntn = document.createElement('div')
+            cntn.id = name
+            cntn.className = 'tabcontent'
+            var menu = document.createElement('div')
+            menu.className = 'tab-ver'
+            cntn.appendChild(menu)
+            cntn.appendChild(document.createElement('div'))
+            document.getElementById('roomsContent').appendChild(cntn)
+        }
+        function addContact2Room(room, member,  sex) {
+            if (document.getElementById(member) &&
+                document.getElementById(member+'-tab'))
+                return
+
+            var contact = document.createElement('div')
+            contact.className = 'chip'
+            contact.id = member+'-tab'
+
+            var chat = document.createElement('div')
+            chat.onclick = function() { openChat(event, member) }
+
+            contact.appendChild(chat)
+            document.getElementById(room).firstChild.appendChild(contact)
+
+            var img = document.createElement('img')
+            img.src = sex ? 'img/men_avatar.png' : 'img/woman_avatar.png'
+            img.className = 'avatar'
+            chat.appendChild(img)
+
+            var b = document.createElement('b')
+            b.className = 'avatar-name'
+            b.textContent = member
+            chat.appendChild(b)
+
+            var usrcntn = document.createElement('div')
+            usrcntn.id = member
+            usrcntn.className = 'tabcontent-ver'
+            usrcntn.textContent = 'Hi, my name is '+ member
+            document.getElementById(room).lastChild.appendChild(usrcntn)
+
+            var closebtn = document.createElement('span')
+            closebtn.className = 'closebtn'
+            closebtn.textContent = 'X'
+            closebtn.onclick = function () {
+                if (user.owner[room] && member === user.name) {
+                    delete user.owner[room]
+                    user.member = null
+                    removeRoom(room)
+                } else {
+                    //this.parentElement.removeChild(this)
+                    removeContact(member)
+                }
+            }
+            contact.appendChild(closebtn)
+
+            if (user.owner[room]) {
+
+                var ulist = document.createElement('div')
+                ulist.id = 'users-list'
+                ulist.className = 'dropdown-content'
+
+                contact.appendChild(ulist)
+                contact.className += ' dropdown'
+                updateUsers()
+            }
+
+            user.member = room
+        }
+        function addUser2Room(room, member, sex) {
+            var usr = document.createElement('button')
+            usr.id = member+'-tab'
+            usr.className = 'tablinks-ver'
+            usr.onclick = function() { openChat(event, member) }
+
+            document.getElementById(room).firstChild.appendChild(usr)
+
+            var usrcntn = document.createElement('div')
+            usrcntn.id = member
+            usrcntn.className = 'tabcontent-ver'
+            usrcntn.textContent = 'Hi, let me introuduce myself, my name is '+ member
+            document.getElementById(room).lastChild.appendChild(usrcntn)
+
+            var img = document.createElement('img')
+            img.src = sex ? 'img/men_avatar.png' : 'img/woman_avatar.png'
+            img.className = 'avatar'
+            usr.appendChild(img)
+
+            var b = document.createElement('b')
+            b.className = 'avatar-name'
+            b.textContent = member
+            usr.appendChild(b)
+
+            if (user.owner[room]) {
+                var ulist = document.createElement('div')
+                ulist.id = 'users-list'
+                ulist.className = 'dropdown-content'
+
+                usr.appendChild(ulist)
+                document.getElementById(room).firstChild.className = 'dropdown'
+            }
+            user.member = room
+        }
+        function moveUser2Room(user, to) {
+            var dst = document.getElementById(to)
+            if (!dst) return
+            dst.firstChild.appendChild(document.getElementById(user+'-tab'))
+            dst.lastChild.appendChild(document.getElementById(user))
+            user.member = to
+        }
+        function removeRoom(room) {
+            var room_tab  = document.getElementById(room+'-tab')
+            var room_cntn = document.getElementById(room)
+
+            room_tab.parentElement.removeChild(room_tab)
+            room_cntn.parentElement.removeChild(room_cntn)
+        }
+        function removeUser(user) {
+            var user_tab  = document.getElementById(user+'-tab')
+            var user_cntn = document.getElementById(user)
+
+            user_tab.parentElement.removeChild(user_tab)
+            user_cntn.parentElement.removeChild(user_cntn)
+        }
+        function removeContact(contact) {
+            removeUser(contact)
+        }
+
+        function updateRoomsList(roomlist) {
+            var room, rooms = document.getElementById('rooms-list')
+            roomlist.forEach(item => {
+                room = document.createElement('a')
+                room.href = '#'
+                room.textContent = item
+                room.onclick = function() {
+                    if (!document.getElementById(this.textContent))
+                        addRoom(this.textContent)
+                    if (user.member) {
+                        moveUser2Room(user.name, this.textContent)
+                    } else {
+                        addContact2Room(this.textContent, user.name, user.sex)
+                        //addUser2Room(this.textContent, user.name, user.sex)
+                    }
+                    user.member = this.textContent
+                    openRoom(null,user.member)
+                    document.getElementById(user.member+'-tab').className += " active"
+                }
+                rooms.appendChild(room)
+            })
+        }
+
+        function Login() {
+            var logicName = 'tb_client'
+
+            user.name = document.getElementById('uname').value
+            user.pswd = document.getElementById('pswd').value
+            document.getElementById('avatar').src = user.sex ? 'img/men_avatar.png' : 'img/woman_avatar.png'
+            document.getElementById('usrname').textContent = 'Hello '+user.name
+
+            clogic.setUserName(user.name)
+            clogic.attachLogic(logicName,function (fsm) {
+
+                clogic.runStep(fsm)
+                logicFsm = fsm
+                user.name = fsm.context.usrname
+                document.getElementById('login').style.display = 'none'
+                document.getElementById('room-mng').style.display = 'block'
+            })
+        }
+
+        function createUserRoom() {
+            var room = prompt('Please enter room name', user.name+'-room')
+            addRoom(room)
+            user.owner[room] = {}
+            if (user.member) {
+                moveUser2Room(user.name, room)
+            } else {
+                addContact2Room(room, user.name, user.sex)
+                //addUser2Room(room, user.name, user.sex)
+            }
+            user.member = room
+            openRoom(null,user.member)
+        }
+
+        function moveVideos2Room(room) {
+            var dst = document.getElementById(room)
+            if (!dst) return
+            var webrtc = document.getElementById('webrtc')
+                webrtc.style.visibility = 'visible'
+            dst.lastChild.appendChild(webrtc)
+        }
+
+        function moveVideos2Lobby() {
+            var webrtc = document.getElementById('webrtc')
+                webrtc.style.visibility = 'hidden'
+            document.getElementById('room-mng').appendChild(webrtc)
+        }
+
+        function addSubscriber(streamId) {
+            // Create a container for a new Subscriber, assign it an id using the streamId, put it inside
+            // the element with id="subscribers"
+            var subContainer = document.createElement('div');
+            subContainer.id = 'stream-' + streamId;
+            document.getElementById('subscribers').appendChild(subContainer);
+            return subContainer
+        }
+
+        function addPublisher() {
+            // Create a container for a new Publisher, assign it an id using the streamId, put it inside
+            var subContainer = document.createElement('div');
+            subContainer.id = 'publish-stream';
+            document.getElementById('publishers').appendChild(subContainer);
+            return subContainer
+        }
+
+        function hangUp() {
+            clogic.hangUp()
+            var i = uinCall.indexOf(logicFsm.context.called);
+            if(i != -1) {
+                uinCall.splice(i, 1);
+            }
+            //removeUser(logicFsm.context.called)
+        }
+
+        window.addEventListener('load', function () {
+            openRoom(event, 'Welcome')
+        }, false);
+    </script>
+    <script src="js/ws_client.js"></script>
+    <script src="/js/clogic.js"></script>
+
+</head>
+<body>
+
+
+
+<div id="Rooms" class="tab">
+    <button class="tablinks" onclick="openRoom(event, 'Welcome')">Welcome</button>
+</div>
+
+<div id="roomsContent">
+
+<div id="Welcome" class="tabcontent">
+    <div id="login">
+        <h2>Video Chat Login</h2>
+
+        <div class="imgcontainer">
+           <img src="img/woman_avatar.png" class="avatar" style="margin-top: -30px;">
+            <label class="switch" onclick="user.sex != user.sex;">
+                <input type="checkbox" checked >
+                <span class="slider"></span>
+            </label>
+            <img src="img/men_avatar.png" class="avatar" style="margin-top: -30px;">
+        </div>
+        <div class="container">
+            <label for="uname" style="display: inline;"><b>Username:</b></label>
+            <input type="text" placeholder="Enter Username" id="uname" required>
+            <p>
+            <label for="pswd" style="display: inline;"><b>Password:</b></label>
+            <input type="password" placeholder="Enter Password" id="pswd" required>
+            <p>
+            <button type="submit" onclick="Login()">Login</button>
+            <p>
+            <label>
+                <input type="checkbox" checked="checked" name="remember"> Remember me
+            </label>
+        </div>
+
+    </div>
+    <div id="room-mng">
+
+        <div style="margin-top: 10%;margin-left: 3%">
+        <b id="usrname">USER</b><p>
+        <img src="img/woman_avatar.png" class="avatar" id="avatar">
+        </div>
+        <button class="submit" onclick="createUserRoom()" style="background-color: #ff0200; width: 150px;left: 34%;top: 20%;">Create Room</button>
+        <!--
+        <div class="vl">
+            <span class="vl-innertext">or</span>
+        </div>
+        -->
+        <div class="dropdown">
+            <button class="submit" style="background-color: #088073; width: 150px;left: 40%;top: 20%;">Join Room</button>
+            <div id="rooms-list" class="dropdown-content" style="left: 40%;"></div>
+        </div>
+
+        <div id="webrtc" class="grid">
+            <article>
+                <button style="position: absolute;right: 20px;top: 2px;">
+                    <img src="img/hangup-icon.png" onclick="hangUp()" width="40px">
+                </button>
+            </article>
+            <div id="publisher" style="position: absolute;top: 60px;right: 100px;"></div>
+            <div id="subscribers" style="position: absolute;right: 100px;top: 300px;"></div>
+        </div>
+    </div>
+</div>
+
+</div>
+
+</body>
+</html>

@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <title>XoIP dynamic attachment call process web client</title>
+    <link href="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/css/bootstrap-combined.min.css" rel="stylesheet">
+    <script src="https://static.opentok.com/v2/js/opentok.min.js"></script>
+    <script type="text/javascript">
+        var apiKey = '<%= apiKey %>';
+        var sessionId = '<%= sessionId %>';
+        var token = '<%= token %>';
+
+        let myName = null
+        let logicFsm = null
+
+        function makeid(n) {
+            var text = "";
+            var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+            for (var i = 0; i < n; i++)
+                text += possible.charAt(Math.floor(Math.random() * possible.length));
+            return text;
+        }
+        function dynamicallyLoadScript(url) {
+            var script = document.createElement("script"); //Make a script DOM node
+            script.src = url; //Set it's src to the provided URL
+            document.head.appendChild(script); //Add it to the end of the head section of the page (could change 'head' to 'body' to add it to the end of the body section instead)
+        }
+        function  updateList(list) {
+            var opt, elem = document.getElementById('called')
+            while (elem.hasChildNodes()) {
+                elem.removeChild(elem.lastChild);
+            }
+            list.forEach(item => {
+                if (myName !== item) {
+                    opt = document.createElement('option');
+                    opt.innerText = item;
+                    opt.value = item;
+                    elem.appendChild(opt);
+                }
+            })
+        }
+        window.addEventListener('load', function () {
+
+            var logicName = 'tb_client'
+            clogic.attachLogic(logicName,function (fsm) {
+
+                clogic.runStep(fsm)
+                logicFsm = fsm
+                myName = fsm.context.usrname
+            })
+
+        }, false);
+
+
+    </script>
+    <script src="js/ws_client.js"></script>
+    <script src="/js/clogic.js"></script>
+
+
+</head>
+<body style="margin: 50px;">
+    <h2>Dynamic attachment call process web client</h2>
+
+    <p class="lead">Weclome to vchat!</p>
+
+    <article>
+        <select id="called" placeholder="Called ID"></select>
+        <input type="button" class="btn btn-primary" value="Call" onclick="clogic.makeCall(document.getElementById('called'))"/>
+        <input type="button" class="btn btn-primary" value="HangUp" onclick="clogic.hangUp()"/>
+    </article>
+
+    <ul id="messages"></ul>
+
+    <div id="publisher"></div>
+    <div id="subscribers"></div>
+</body>
+</html>

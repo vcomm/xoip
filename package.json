@@ -1,0 +1,21 @@
+{
+  "name": "medial_broker",
+  "version": "0.0.1",
+  "description": "Group video chat app to demonstrate the basic functionality of OpenTok",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "dafsm": "git+https://github.com/vcomm/dafsm.git#dev",
+    "ejs": "^2.5.5",
+    "express": "^3.5.0",
+    "jsonwebtoken": "^8.2.0",
+    "lodash": "^4.17.5",
+    "opentok-token": "^1.1.0",
+    "request": "^2.85.0",
+    "ws": "^6.0.0"
+  }
+}
