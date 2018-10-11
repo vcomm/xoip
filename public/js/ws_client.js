@@ -35,7 +35,7 @@ if ('WebSocket' in window){
             if(bstatus)
                 ws.send(message);
             else
-                setTimeout(function(){ ws.send(message); }, 100);
+                setTimeout(function(){ if(bstatus) ws.send(message); }, 1000);
         };
 
     };
