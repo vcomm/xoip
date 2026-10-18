@@ -1,10 +1,27 @@
-# xoip-call ⚡
+# @vcomm/xoip-call ⚡
 
 > **Production-ready, modular WebRTC Custom Element (`<xoip-call>`)** with Perfect Negotiation, Multi-Camera support, Screen Sharing, hardware-accelerated End-to-End Encryption (E2EE), and swappable signaling adapters (Firebase Firestore, WebSocket, and decentralized Nostr P2P).
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![TypeScript](https://img.shields.io/badge/TypeScript-Ready-blue.svg)](types/index.d.ts)
+[![TypeScript](https://img.shields.io/badge/TypeScript-Ready-blue.svg)](#features)
 [![Zero Dependencies Core](https://img.shields.io/badge/Dependencies-Zero%20Core-green.svg)](#features)
+
+---
+
+## 🌐 Live Demo & Local Development
+
+- **Live Demo (GitHub Pages):** [https://vcomm.github.io/xoip/](https://vcomm.github.io/xoip/)
+
+```bash
+# 1. Install dependencies
+npm install
+
+# 2. Run local dev server
+npm run dev
+
+# 3. Build & Deploy to GitHub Pages (dist only)
+npm run deploy
+```
 
 ---
 
@@ -86,13 +103,13 @@
 ## 📦 Installation
 
 ```bash
-npm install xoip-call
+npm install @vcomm/xoip-call
 ```
 
 Or use directly via CDN (no build step required):
 
 ```html
-<script type="module" src="https://unpkg.com/xoip-call/index.js"></script>
+<script type="module" src="https://cdn.jsdelivr.net/npm/@vcomm/xoip-call/dist/index.js"></script>
 ```
 
 ---
@@ -107,7 +124,7 @@ Or use directly via CDN (no build step required):
 <head>
   <meta charset="UTF-8">
   <title>XOIP Call</title>
-  <script type="module" src="node_modules/xoip-call/index.js"></script>
+  <script type="module" src="node_modules/@vcomm/xoip-call/dist/index.js"></script>
 </head>
 <body>
 
@@ -127,8 +144,8 @@ Or use directly via CDN (no build step required):
 
 ```tsx
 import React, { useEffect, useRef } from 'react';
-import 'xoip-call';
-import type { XoipCallElement } from 'xoip-call';
+import '@vcomm/xoip-call';
+import type { XoipCallElement } from '@vcomm/xoip-call';
 
 export const VideoChat: React.FC = () => {
   const xoipRef = useRef<XoipCallElement>(null);
@@ -175,7 +192,7 @@ export const VideoChat: React.FC = () => {
 
 <script setup>
 import { ref } from 'vue';
-import 'xoip-call';
+import '@vcomm/xoip-call';
 
 const xoip = ref(null);
 const onRoomCreated = (e) => {
@@ -214,7 +231,7 @@ await el.joinRoom('room-id-123');           // Join existing room (callee / poli
 await el.leaveRoom();                       // End call and hang up
 
 // Config Masking & Tokenization (protect keys from repos)
-import { compressConfig, decompressConfig } from 'xoip-call';
+import { compressConfig, decompressConfig } from '@vcomm/xoip-call';
 const token = await compressConfig({ apiKey: "AIza...", projectId: "my-app", ... });
 el.setAttribute('signaling-token', token);
 
@@ -236,7 +253,7 @@ el.sendData({ text: 'Hello!' });            // Send arbitrary JSON over DataChan
 const stats = await el.getStats();          // Get full WebRTC RTCStatsReport
 
 // Custom Signaling Adapter Injection
-import { WebSocketSignalingAdapter } from 'xoip-call/signaling/websocket';
+import { WebSocketSignalingAdapter } from '@vcomm/xoip-call/signaling/websocket';
 el.signalingAdapter = new WebSocketSignalingAdapter('wss://signal.example.com');
 ```
 
@@ -301,4 +318,4 @@ Available parts: `welcome-screen`, `call-container`, `video-main`, `controls-bar
 
 ## 📄 License
 
-[MIT](LICENSE) © PEMA Team
+[MIT](LICENSE) © VCOMM Team

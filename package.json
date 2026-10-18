@@ -1,0 +1,21 @@
+{
+  "name": "xoip-appl",
+  "version": "1.0.0",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "dev": "vite",
+    "serve": "vite preview",
+    "build": "vite build",
+    "predeploy": "npm run build",
+    "deploy": "gh-pages -d dist --nojekyll",
+    "cleanup": "find . -name \"._*\" -delete"
+  },
+  "dependencies": {
+    "@vcomm/xoip-call": "file:../../xoip/vcomm-xoip-call-1.0.0.tgz"
+  },
+  "devDependencies": {
+    "gh-pages": "^6.3.0",
+    "vite": "^6.0.0"
+  }
+}
