@@ -6,9 +6,9 @@
   "scripts": {
     "dev": "vite",
     "serve": "vite preview",
-    "build": "vite build",
-    "predeploy": "npm run build",
-    "deploy": "gh-pages -d dist --nojekyll",
+    "build": "vite build && npm run cleanup",
+    "predeploy": "npm run build && npm run cleanup",
+    "deploy": "COPYFILE_DISABLE=1 gh-pages -d dist --nojekyll",
     "cleanup": "find . -name \"._*\" -delete"
   },
   "dependencies": {
