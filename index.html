@@ -1,1 +1,484 @@
-<!doctypehtml><html lang="en"><meta charset="UTF-8"><meta name="viewport"content="width=device-width,initial-scale=1"><link rel="icon"type="image/x-icon"href="favicon.ico"><title>WebRTC Widget</title><style>:root{--primary-color:#2c3e50;--accent-color:#3498db;--danger-color:#e74c3c}*{box-sizing:border-box;margin:0;padding:0}body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;color:var(--primary-color);background-image:url('background.jpg');background-size:cover;background-position:center;background-repeat:no-repeat;background-attachment:fixed}.container{max-width:100vw;height:100vh;padding:1rem}.welcome-screen{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;gap:1rem;background-color:rgba(255,255,255,.9);padding:2rem;border-radius:16px;box-shadow:0 4px 6px rgba(0,0,0,.1);max-width:600px;margin:auto}.room-controls{display:flex;gap:1rem;margin-top:1rem}.video-room{display:none;height:100%;position:relative}.remote-video{width:100%;height:100%;object-fit:cover;background:#000}.local-video{position:absolute;top:1rem;right:1rem;width:150px;height:100px;object-fit:cover;border:2px solid #fff;border-radius:8px;background:#000}.controls{position:absolute;bottom:2rem;left:50%;transform:translateX(-50%);display:flex;gap:1rem;background:rgba(0,0,0,.5);padding:1rem;border-radius:50px}button{padding:.8rem 1.5rem;border:none;border-radius:25px;background:var(--accent-color);color:#fff;cursor:pointer;font-size:1rem}button:disabled{opacity:.5;cursor:not-allowed;background-color:#ccc}button.danger{background:var(--danger-color)}input{padding:.8rem 1.5rem;border:1px solid #ddd;border-radius:25px;font-size:1rem;width:300px;max-width:100%}input:disabled{background-color:#f5f5f5;cursor:not-allowed}input.error{color:var(--danger-color);border-color:var(--danger-color)}.control-button{width:50px;height:50px;border-radius:50%;padding:0;display:flex;align-items:center;justify-content:center;position:relative}.control-button:hover::after{content:attr(data-tooltip);position:absolute;bottom:100%;left:50%;transform:translateX(-50%);padding:4px 8px;background:rgba(0,0,0,.8);color:#fff;border-radius:4px;font-size:12px;white-space:nowrap;margin-bottom:8px}#shareBtn:hover::after{content:"Share room link"}@media (max-width:768px){.local-video{width:100px;height:70px}.controls{bottom:1rem}}</style><script type="module"crossorigin src="index.js"></script><div class="container"><div id="welcomeScreen"class="welcome-screen"><h1>PsychoEmotional Video Call</h1><input id="roomId"placeholder="Room ID"><div class="room-controls"><button id="createBtn">Create Room</button> <button id="joinBtn">Join Room</button></div></div><div id="videoRoom"class="video-room"><video id="remoteVideo"class="remote-video"autoplay playsinline></video><video id="localVideo"class="local-video"autoplay playsinline muted></video><div class="controls"><button id="audioBtn"class="control-button">🎤</button> <button id="videoBtn"class="control-button">📷</button> <button id="shareBtn"class="control-button">📢</button> <button id="leaveBtn"class="control-button danger">📞</button></div></div></div>
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" type="image/x-icon" href="./assets/favicon-Cbuf-LIi.ico">
+  <title>XOIP Call — Nostr P2P & xoip:// URI</title>
+  <style>
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      background: #0a0f1e url('./assets/background-CB25iSCE.jpg') center/cover no-repeat fixed;
+      color: #f8fafc;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+      padding: 24px;
+      gap: 18px;
+    }
+
+    .header {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+      text-align: center;
+      width: min(94vw, 1440px);
+      padding: 20px 24px;
+      background: rgba(15, 23, 42, 0.78);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(168, 85, 247, 0.28);
+      border-radius: 16px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.45);
+    }
+
+    h1 {
+      font-size: 26px;
+      font-weight: 800;
+      color: #ffffff;
+      background: linear-gradient(135deg, #ffffff 0%, #ede9fe 45%, #c084fc 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+      letter-spacing: -0.5px;
+      filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.8));
+    }
+
+    .badges {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .badge {
+      font-size: 11px;
+      font-weight: 600;
+      padding: 5px 12px;
+      border-radius: 9999px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      backdrop-filter: blur(8px);
+    }
+
+    .badge-purple {
+      background: rgba(168, 85, 247, 0.22);
+      color: #e9d5ff;
+      border: 1px solid rgba(168, 85, 247, 0.45);
+    }
+
+    .badge-blue {
+      background: rgba(59, 130, 246, 0.22);
+      color: #bfdbfe;
+      border: 1px solid rgba(59, 130, 246, 0.45);
+    }
+
+    .badge-green {
+      background: rgba(16, 185, 129, 0.22);
+      color: #a7f3d0;
+      border: 1px solid rgba(16, 185, 129, 0.45);
+    }
+
+    .badge-amber {
+      background: rgba(245, 158, 11, 0.22);
+      color: #fde68a;
+      border: 1px solid rgba(245, 158, 11, 0.45);
+    }
+
+    /* ─── Двухколоночный макет страницы ─── */
+    .app-layout {
+      display: flex;
+      gap: 20px;
+      width: min(94vw, 1440px);
+      align-items: flex-start;
+    }
+
+    /* Левая колонка: URI Manager + xoip-call */
+    .main-column {
+      flex: 2.2;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+      min-width: 0;
+      width: 100%;
+    }
+
+    /* Правая колонка: Event Log */
+    .sidebar-column {
+      flex: 1;
+      min-width: 340px;
+      position: sticky;
+      top: 24px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    xoip-call {
+      width: 100%;
+      min-height: 440px;
+      display: block;
+
+      --xoip-bg: rgba(15, 23, 42, 0.9);
+      --xoip-surface: #1e293b;
+      --xoip-surface-2: #334155;
+      --xoip-primary: #a855f7;
+      --xoip-primary-h: #9333ea;
+      --xoip-danger: #ef4444;
+      --xoip-success: #10b981;
+      --xoip-radius: 16px;
+      backdrop-filter: blur(14px);
+      box-shadow: 0 4px 24px rgba(0, 0, 0, 0.4);
+    }
+
+    xoip-call::part(controls-bar) {
+      background: rgba(15, 23, 42, 0.9);
+      backdrop-filter: blur(12px);
+    }
+
+    xoip-call::part(btn-hangup) {
+      border-radius: 50%;
+    }
+
+    .uri-manager {
+      width: 100%;
+      background: rgba(15, 23, 42, 0.88);
+      backdrop-filter: blur(14px);
+      border: 1px solid rgba(168, 85, 247, 0.28);
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 4px 24px rgba(0, 0, 0, 0.35);
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .uri-header {
+      padding: 12px 18px;
+      background: rgba(30, 41, 59, 0.7);
+      border-bottom: 1px solid rgba(148, 163, 184, 0.12);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .uri-title {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 700;
+      font-size: 14px;
+      color: #e2e8f0;
+    }
+
+    .uri-body {
+      padding: 16px 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .uri-actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .action-btn {
+      background: #1e293b;
+      border: 1px solid #334155;
+      color: #e2e8f0;
+      padding: 9px 15px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .action-btn:hover:not(:disabled) {
+      background: #334155;
+      border-color: #a855f7;
+      color: #fff;
+    }
+
+    .action-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .action-btn.primary-btn {
+      background: linear-gradient(135deg, #a855f7 0%, #7c3aed 100%);
+      border: 1px solid rgba(168, 85, 247, 0.5);
+      color: #fff;
+      font-weight: 600;
+    }
+
+    .action-btn.primary-btn:hover {
+      background: linear-gradient(135deg, #9333ea 0%, #6d28d9 100%);
+      box-shadow: 0 0 16px rgba(168, 85, 247, 0.4);
+    }
+
+    .uri-input-group {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .uri-input {
+      flex: 1;
+      min-width: 260px;
+      background: #090e1a;
+      border: 1px solid #334155;
+      border-radius: 8px;
+      padding: 10px 14px;
+      color: #f1f5f9;
+      font-family: 'Fira Code', monospace;
+      font-size: 12px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .uri-input:focus {
+      border-color: #a855f7;
+      box-shadow: 0 0 0 2px rgba(168, 85, 247, 0.2);
+    }
+
+    .uri-display {
+      background: #090e1a;
+      border: 1px solid rgba(16, 185, 129, 0.25);
+      border-radius: 8px;
+      padding: 12px 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .uri-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 11px;
+      color: #94a3b8;
+    }
+
+    .uri-code {
+      font-family: 'Fira Code', monospace;
+      font-size: 12px;
+      color: #34d399;
+      word-break: break-all;
+      line-height: 1.45;
+      user-select: all;
+    }
+
+    /* Sidebar: Event Log */
+    #event-log {
+      width: 100%;
+      background: rgba(15, 23, 42, 0.88);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(168, 85, 247, 0.28);
+      border-radius: 16px;
+      padding: 16px 18px;
+      font-size: 12px;
+      font-family: 'Fira Code', 'Cascadia Code', monospace;
+      color: #94a3b8;
+      box-shadow: 0 4px 24px rgba(0, 0, 0, 0.35);
+      min-width: 0;
+      height: 720px;
+      max-height: calc(100vh - 48px);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      box-sizing: border-box;
+    }
+
+    .log-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-bottom: 10px;
+      border-bottom: 1px solid rgba(148, 163, 184, 0.15);
+      margin-bottom: 10px;
+    }
+
+    .log-header h2 {
+      font-size: 12px;
+      color: #c084fc;
+      margin: 0;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .clear-btn {
+      background: rgba(51, 65, 85, 0.4);
+      border: 1px solid rgba(148, 163, 184, 0.2);
+      color: #94a3b8;
+      border-radius: 6px;
+      font-size: 11px;
+      padding: 3px 8px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .clear-btn:hover {
+      background: rgba(239, 68, 68, 0.25);
+      color: #fca5a5;
+      border-color: rgba(239, 68, 68, 0.4);
+    }
+
+    #event-log-list {
+      flex: 1;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      padding-right: 4px;
+    }
+
+    #event-log-list .entry {
+      padding: 5px 0;
+      border-bottom: 1px solid rgba(51, 65, 85, 0.35);
+      font-size: 11px;
+      line-height: 1.45;
+      word-break: break-word;
+    }
+
+    #event-log-list .entry:last-child {
+      border: none;
+    }
+
+    .ev-name {
+      color: #c084fc;
+      font-weight: 600;
+    }
+
+    .ev-detail {
+      color: #94a3b8;
+    }
+
+    @media (max-width: 900px) {
+      .app-layout {
+        flex-direction: column;
+        width: 100%;
+      }
+      .sidebar-column {
+        width: 100%;
+        min-width: 0;
+        position: static;
+      }
+      #event-log {
+        height: 320px;
+        max-height: 360px;
+      }
+    }
+  </style>
+  <script type="module" crossorigin src="./assets/index-BwFWBAf2.js"></script>
+</head>
+
+<body>
+
+  <div class="header">
+    <h1>⚡ XOIP Call — Nostr P2P & xoip:// URI</h1>
+    <div class="badges">
+      <span class="badge badge-purple">🟣 100% Serverless</span>
+      <span class="badge badge-blue">🔐 ECDH End-to-End Encrypted</span>
+      <span class="badge badge-green">⚡ Ephemeral Nostr (Kind 25050)</span>
+      <span class="badge badge-amber">🔗 xoip:// URI Protocol</span>
+      <span class="badge badge-purple" id="badge-relays">🔍 Relays: Discovering...</span>
+    </div>
+  </div>
+
+  <div class="app-layout">
+    <!-- Левая колонка: URI Manager + xoip-call -->
+    <main class="main-column">
+      <!-- Панель управления XOIP URI -->
+      <div class="uri-manager">
+        <div class="uri-header">
+          <div class="uri-title">
+            <span>🔗 XOIP URI Manager</span>
+            <span style="font-size: 11px; color: #a855f7; font-weight: normal;">(Nostr P2P Signaling)</span>
+          </div>
+          <span class="badge badge-purple">xoip://call/nostr/...</span>
+        </div>
+        <div class="uri-body">
+          <!-- Nostr Relay Discovery Bar -->
+          <div id="relay-discovery-bar"
+            style="display: flex; justify-content: space-between; align-items: center; background: #090e1a; border: 1px solid #1e293b; border-radius: 8px; padding: 10px 14px; font-size: 12px; color: #94a3b8; flex-wrap: wrap; gap: 8px;">
+            <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+              <span style="color: #a855f7; font-weight: 600;">📡 Nostr Relay Discovery:</span>
+              <span id="relays-status-text" style="color: #cbd5e1;">Discovering active relays (Health Check)...</span>
+            </div>
+            <button class="action-btn" id="btn-discover-relays" style="padding: 5px 12px; font-size: 11px;">🔄 Refresh Relays</button>
+          </div>
+
+          <div class="uri-actions">
+            <button class="action-btn primary-btn" id="btn-create-uri">⚡ Create Call via URI</button>
+            <button class="action-btn" id="btn-copy-uri" disabled>📋 Copy xoip:// URI</button>
+            <button class="action-btn" id="btn-open-peer">👥 Open Peer Tab (New Tab)</button>
+            <button class="action-btn" id="btn-send-ping">💬 DataChannel Ping</button>
+          </div>
+
+          <div class="uri-input-group">
+            <input type="text" class="uri-input" id="uri-input"
+              placeholder="Paste xoip://call/nostr/XST1... URI to connect..." autocomplete="off" spellcheck="false">
+            <button class="action-btn" id="btn-connect-uri">Connect to URI</button>
+          </div>
+
+          <div id="uri-display" class="uri-display" style="display:none">
+            <div class="uri-meta">
+              <span style="color:#34d399; font-weight: 600;">ACTIVE XOIP URI:</span>
+              <span id="uri-timestamp"></span>
+            </div>
+            <div id="uri-text" class="uri-code"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Основной WebRTC компонент с сигналингом Nostr -->
+      <xoip-call id="xoip" signaling-type="nostr" signaling-config='{
+          "relays": [
+            "wss://greenart7c3.feeds.relay.tools/",
+            "wss://relay.primal.net",
+            "wss://relay.damus.io"
+          ]
+        }' ice-servers='[
+          { "urls": ["stun:stun1.l.google.com:19302", "stun:stun2.l.google.com:19302"] }
+        ]' multi-camera e2ee-enabled></xoip-call>
+    </main>
+
+    <!-- Правая колонка: Live Events Log -->
+    <aside class="sidebar-column">
+      <div id="event-log">
+        <div class="log-header">
+          <h2>📡 Live Events Log</h2>
+          <button id="btn-clear-log" class="clear-btn" title="Clear event log">Clear</button>
+        </div>
+        <div id="event-log-list"></div>
+      </div>
+    </aside>
+  </div>
+
+  <!-- Подключение компонента xoip-call -->
+</body>
+
+</html>
