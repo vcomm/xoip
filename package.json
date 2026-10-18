@@ -12,7 +12,7 @@
     "cleanup": "find . -name \"._*\" -delete"
   },
   "dependencies": {
-    "@vcomm/xoip-call": "file:../../xoip/vcomm-xoip-call-1.0.0.tgz"
+    "@vcomm/xoip-call": "file:./vcomm-xoip-call-1.0.0.tgz"
   },
   "devDependencies": {
     "gh-pages": "^6.3.0",
