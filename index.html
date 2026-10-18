@@ -4,6 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" type="image/x-icon" href="./favicon.ico">
   <title>XOIP Call — Nostr P2P & xoip:// URI</title>
   <style>
     *,
@@ -16,7 +17,7 @@
 
     body {
       font-family: 'Inter', system-ui, -apple-system, sans-serif;
-      background: #0a0f1e;
+      background: #0a0f1e url('./background.jpg') center/cover no-repeat fixed;
       color: #f8fafc;
       display: flex;
       flex-direction: column;
@@ -30,18 +31,28 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 8px;
+      gap: 12px;
       text-align: center;
+      width: min(94vw, 1440px);
+      padding: 20px 24px;
+      background: rgba(15, 23, 42, 0.78);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(168, 85, 247, 0.28);
+      border-radius: 16px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.45);
     }
 
     h1 {
-      font-size: 24px;
+      font-size: 26px;
       font-weight: 800;
-      background: linear-gradient(135deg, #a855f7 0%, #6366f1 50%, #3b82f6 100%);
+      color: #ffffff;
+      background: linear-gradient(135deg, #ffffff 0%, #ede9fe 45%, #c084fc 100%);
       -webkit-background-clip: text;
       background-clip: text;
       -webkit-text-fill-color: transparent;
       letter-spacing: -0.5px;
+      filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.8));
     }
 
     .badges {
@@ -54,71 +65,71 @@
     .badge {
       font-size: 11px;
       font-weight: 600;
-      padding: 4px 10px;
+      padding: 5px 12px;
       border-radius: 9999px;
       text-transform: uppercase;
       letter-spacing: 0.5px;
+      backdrop-filter: blur(8px);
     }
 
     .badge-purple {
-      background: rgba(168, 85, 247, 0.15);
-      color: #c084fc;
-      border: 1px solid rgba(168, 85, 247, 0.3);
+      background: rgba(168, 85, 247, 0.22);
+      color: #e9d5ff;
+      border: 1px solid rgba(168, 85, 247, 0.45);
     }
 
     .badge-blue {
-      background: rgba(59, 130, 246, 0.15);
-      color: #60a5fa;
-      border: 1px solid rgba(59, 130, 246, 0.3);
+      background: rgba(59, 130, 246, 0.22);
+      color: #bfdbfe;
+      border: 1px solid rgba(59, 130, 246, 0.45);
     }
 
     .badge-green {
-      background: rgba(16, 185, 129, 0.15);
-      color: #34d399;
-      border: 1px solid rgba(16, 185, 129, 0.3);
+      background: rgba(16, 185, 129, 0.22);
+      color: #a7f3d0;
+      border: 1px solid rgba(16, 185, 129, 0.45);
     }
 
     .badge-amber {
-      background: rgba(245, 158, 11, 0.15);
-      color: #fbbf24;
-      border: 1px solid rgba(245, 158, 11, 0.3);
+      background: rgba(245, 158, 11, 0.22);
+      color: #fde68a;
+      border: 1px solid rgba(245, 158, 11, 0.45);
     }
 
-    .info-card {
-      width: 100%;
-      max-width: 960px;
-      background: rgba(30, 41, 59, 0.5);
-      border: 1px solid rgba(148, 163, 184, 0.15);
-      border-radius: 12px;
-      padding: 14px 18px;
-      font-size: 13px;
-      line-height: 1.5;
-      color: #94a3b8;
+    /* ─── Двухколоночный макет страницы ─── */
+    .app-layout {
+      display: flex;
+      gap: 20px;
+      width: min(94vw, 1440px);
+      align-items: flex-start;
+    }
+
+    /* Левая колонка: URI Manager + xoip-call */
+    .main-column {
+      flex: 2.2;
       display: flex;
       flex-direction: column;
-      gap: 6px;
+      gap: 18px;
+      min-width: 0;
+      width: 100%;
     }
 
-    .info-card strong {
-      color: #f1f5f9;
-    }
-
-    .info-card code {
-      font-family: 'Fira Code', 'Cascadia Code', monospace;
-      color: #c084fc;
-      background: rgba(0, 0, 0, 0.3);
-      padding: 2px 6px;
-      border-radius: 4px;
-      font-size: 12px;
+    /* Правая колонка: Event Log */
+    .sidebar-column {
+      flex: 1;
+      min-width: 340px;
+      position: sticky;
+      top: 24px;
+      display: flex;
+      flex-direction: column;
     }
 
     xoip-call {
       width: 100%;
-      max-width: 960px;
-      min-height: 380px;
+      min-height: 440px;
       display: block;
 
-      --xoip-bg: #0f172a;
+      --xoip-bg: rgba(15, 23, 42, 0.9);
       --xoip-surface: #1e293b;
       --xoip-surface-2: #334155;
       --xoip-primary: #a855f7;
@@ -126,6 +137,8 @@
       --xoip-danger: #ef4444;
       --xoip-success: #10b981;
       --xoip-radius: 16px;
+      backdrop-filter: blur(14px);
+      box-shadow: 0 4px 24px rgba(0, 0, 0, 0.4);
     }
 
     xoip-call::part(controls-bar) {
@@ -137,15 +150,17 @@
       border-radius: 50%;
     }
 
-    /* ─── Панель XOIP URI Manager ─── */
     .uri-manager {
       width: 100%;
-      max-width: 960px;
-      background: #0f172a;
-      border: 1px solid rgba(168, 85, 247, 0.25);
-      border-radius: 14px;
+      background: rgba(15, 23, 42, 0.88);
+      backdrop-filter: blur(14px);
+      border: 1px solid rgba(168, 85, 247, 0.28);
+      border-radius: 16px;
       overflow: hidden;
-      box-shadow: 0 4px 24px rgba(0, 0, 0, 0.3);
+      box-shadow: 0 4px 24px rgba(0, 0, 0, 0.35);
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
     }
 
     .uri-header {
@@ -271,35 +286,84 @@
       user-select: all;
     }
 
-    /* Панель событий */
+    /* Sidebar: Event Log */
     #event-log {
       width: 100%;
-      max-width: 960px;
-      background: #0f172a;
-      border: 1px solid #1e293b;
-      border-radius: 10px;
-      padding: 14px 16px;
+      background: rgba(15, 23, 42, 0.88);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(168, 85, 247, 0.28);
+      border-radius: 16px;
+      padding: 16px 18px;
       font-size: 12px;
       font-family: 'Fira Code', 'Cascadia Code', monospace;
       color: #94a3b8;
-      max-height: 200px;
-      overflow-y: auto;
+      box-shadow: 0 4px 24px rgba(0, 0, 0, 0.35);
+      min-width: 0;
+      height: 720px;
+      max-height: calc(100vh - 48px);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      box-sizing: border-box;
     }
 
-    #event-log h2 {
-      font-size: 11px;
-      color: #64748b;
-      margin-bottom: 8px;
+    .log-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-bottom: 10px;
+      border-bottom: 1px solid rgba(148, 163, 184, 0.15);
+      margin-bottom: 10px;
+    }
+
+    .log-header h2 {
+      font-size: 12px;
+      color: #c084fc;
+      margin: 0;
       text-transform: uppercase;
-      letter-spacing: 1px;
+      letter-spacing: 0.8px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 6px;
     }
 
-    #event-log .entry {
-      padding: 3px 0;
-      border-bottom: 1px solid #1e293b;
+    .clear-btn {
+      background: rgba(51, 65, 85, 0.4);
+      border: 1px solid rgba(148, 163, 184, 0.2);
+      color: #94a3b8;
+      border-radius: 6px;
+      font-size: 11px;
+      padding: 3px 8px;
+      cursor: pointer;
+      transition: all 0.2s;
     }
 
-    #event-log .entry:last-child {
+    .clear-btn:hover {
+      background: rgba(239, 68, 68, 0.25);
+      color: #fca5a5;
+      border-color: rgba(239, 68, 68, 0.4);
+    }
+
+    #event-log-list {
+      flex: 1;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      padding-right: 4px;
+    }
+
+    #event-log-list .entry {
+      padding: 5px 0;
+      border-bottom: 1px solid rgba(51, 65, 85, 0.35);
+      font-size: 11px;
+      line-height: 1.45;
+      word-break: break-word;
+    }
+
+    #event-log-list .entry:last-child {
       border: none;
     }
 
@@ -310,6 +374,22 @@
 
     .ev-detail {
       color: #94a3b8;
+    }
+
+    @media (max-width: 900px) {
+      .app-layout {
+        flex-direction: column;
+        width: 100%;
+      }
+      .sidebar-column {
+        width: 100%;
+        min-width: 0;
+        position: static;
+      }
+      #event-log {
+        height: 320px;
+        max-height: 360px;
+      }
     }
   </style>
 </head>
@@ -327,91 +407,95 @@
     </div>
   </div>
 
-  <div class="info-card">
-    <div><strong>Бессерверный WebRTC-сигналинг через Nostr &amp; xoip:// URI:</strong> универсальная адресация
-      <code>xoip://call/nostr/&lt;TOKEN&gt;?room=&lt;ROOM_ID&gt;#key=&lt;ROOM_KEY&gt;</code>.
-    </div>
-    <div>Секретный ключ <code>#key=</code> находится только во фрагменте URL и <strong>никогда не передаётся на
-        релеи</strong>. Конфигурация релеев и метаданные защищены зашифрованным токеном <code>XST1</code>.</div>
-  </div>
-
-  <!-- Панель управления XOIP URI -->
-  <div class="uri-manager">
-    <div class="uri-header">
-      <div class="uri-title">
-        <span>🔗 XOIP URI Manager</span>
-        <span style="font-size: 11px; color: #a855f7; font-weight: normal;">(Nostr P2P Signaling)</span>
-      </div>
-      <span class="badge badge-purple">xoip://call/nostr/...</span>
-    </div>
-    <div class="uri-body">
-      <!-- Блок Nostr Relay Discovery -->
-      <div id="relay-discovery-bar"
-        style="display: flex; justify-content: space-between; align-items: center; background: #090e1a; border: 1px solid #1e293b; border-radius: 8px; padding: 10px 14px; font-size: 12px; color: #94a3b8; flex-wrap: wrap; gap: 8px;">
-        <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
-          <span style="color: #a855f7; font-weight: 600;">📡 Nostr Relay Discovery:</span>
-          <span id="relays-status-text" style="color: #cbd5e1;">Поиск активных релеев (Health Check)...</span>
+  <div class="app-layout">
+    <!-- Левая колонка: URI Manager + xoip-call -->
+    <main class="main-column">
+      <!-- Панель управления XOIP URI -->
+      <div class="uri-manager">
+        <div class="uri-header">
+          <div class="uri-title">
+            <span>🔗 XOIP URI Manager</span>
+            <span style="font-size: 11px; color: #a855f7; font-weight: normal;">(Nostr P2P Signaling)</span>
+          </div>
+          <span class="badge badge-purple">xoip://call/nostr/...</span>
         </div>
-        <button class="action-btn" id="btn-discover-relays" style="padding: 5px 12px; font-size: 11px;">🔄 Обновить
-          релеи</button>
-      </div>
+        <div class="uri-body">
+          <!-- Nostr Relay Discovery Bar -->
+          <div id="relay-discovery-bar"
+            style="display: flex; justify-content: space-between; align-items: center; background: #090e1a; border: 1px solid #1e293b; border-radius: 8px; padding: 10px 14px; font-size: 12px; color: #94a3b8; flex-wrap: wrap; gap: 8px;">
+            <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+              <span style="color: #a855f7; font-weight: 600;">📡 Nostr Relay Discovery:</span>
+              <span id="relays-status-text" style="color: #cbd5e1;">Discovering active relays (Health Check)...</span>
+            </div>
+            <button class="action-btn" id="btn-discover-relays" style="padding: 5px 12px; font-size: 11px;">🔄 Refresh Relays</button>
+          </div>
 
-      <div class="uri-actions">
-        <button class="action-btn primary-btn" id="btn-create-uri">⚡ Создать звонок по URI</button>
-        <button class="action-btn" id="btn-copy-uri" disabled>📋 Скопировать xoip:// URI</button>
-        <button class="action-btn" id="btn-open-peer">👥 Открыть вкладку собеседника (New Tab)</button>
-        <button class="action-btn" id="btn-send-ping">💬 DataChannel Ping</button>
-      </div>
+          <div class="uri-actions">
+            <button class="action-btn primary-btn" id="btn-create-uri">⚡ Create Call via URI</button>
+            <button class="action-btn" id="btn-copy-uri" disabled>📋 Copy xoip:// URI</button>
+            <button class="action-btn" id="btn-open-peer">👥 Open Peer Tab (New Tab)</button>
+            <button class="action-btn" id="btn-send-ping">💬 DataChannel Ping</button>
+          </div>
 
-      <div class="uri-input-group">
-        <input type="text" class="uri-input" id="uri-input"
-          placeholder="Вставьте xoip://call/nostr/XST1... URI для подключения..." autocomplete="off" spellcheck="false">
-        <button class="action-btn" id="btn-connect-uri">Подключиться к URI</button>
-      </div>
+          <div class="uri-input-group">
+            <input type="text" class="uri-input" id="uri-input"
+              placeholder="Paste xoip://call/nostr/XST1... URI to connect..." autocomplete="off" spellcheck="false">
+            <button class="action-btn" id="btn-connect-uri">Connect to URI</button>
+          </div>
 
-      <div id="uri-display" class="uri-display" style="display:none">
-        <div class="uri-meta">
-          <span style="color:#34d399; font-weight: 600;">АКТИВНЫЙ XOIP URI:</span>
-          <span id="uri-timestamp"></span>
+          <div id="uri-display" class="uri-display" style="display:none">
+            <div class="uri-meta">
+              <span style="color:#34d399; font-weight: 600;">ACTIVE XOIP URI:</span>
+              <span id="uri-timestamp"></span>
+            </div>
+            <div id="uri-text" class="uri-code"></div>
+          </div>
         </div>
-        <div id="uri-text" class="uri-code"></div>
       </div>
-    </div>
-  </div>
 
-  <!--
-    ОСНОВНОЙ КОМПОНЕНТ С СИГНАЛИНГОМ NOSTR
-  -->
-  <xoip-call id="xoip" signaling-type="nostr" signaling-config='{
-      "relays": [
-        "wss://greenart7c3.feeds.relay.tools/",
-        "wss://relay.primal.net",
-        "wss://relay.damus.io"
-      ]
-    }' ice-servers='[
-      { "urls": ["stun:stun1.l.google.com:19302", "stun:stun2.l.google.com:19302"] }
-    ]' multi-camera e2ee-enabled></xoip-call>
+      <!-- Основной WebRTC компонент с сигналингом Nostr -->
+      <xoip-call id="xoip" signaling-type="nostr" signaling-config='{
+          "relays": [
+            "wss://greenart7c3.feeds.relay.tools/",
+            "wss://relay.primal.net",
+            "wss://relay.damus.io"
+          ]
+        }' ice-servers='[
+          { "urls": ["stun:stun1.l.google.com:19302", "stun:stun2.l.google.com:19302"] }
+        ]' multi-camera e2ee-enabled></xoip-call>
+    </main>
 
-  <!-- Лог событий в реальном времени -->
-  <div id="event-log">
-    <h2>📡 Live Events Log</h2>
+    <!-- Правая колонка: Live Events Log -->
+    <aside class="sidebar-column">
+      <div id="event-log">
+        <div class="log-header">
+          <h2>📡 Live Events Log</h2>
+          <button id="btn-clear-log" class="clear-btn" title="Clear event log">Clear</button>
+        </div>
+        <div id="event-log-list"></div>
+      </div>
+    </aside>
   </div>
 
   <!-- Подключение компонента xoip-call -->
   <script type="module">
-    import "@vcomm/xoip-call";
-  </script>
-
-  <script type="module">
+    import '@vcomm/xoip-call';
     import { createRoom, NostrRelayDiscoveryProvider } from '@vcomm/xoip-call';
 
     const el = document.getElementById('xoip');
-    const log = document.getElementById('event-log');
+    const log = document.getElementById('event-log-list') || document.getElementById('event-log');
     const uriInput = document.getElementById('uri-input');
     const uriDisplay = document.getElementById('uri-display');
     const uriText = document.getElementById('uri-text');
     const uriTimestamp = document.getElementById('uri-timestamp');
     const copyUriBtn = document.getElementById('btn-copy-uri');
+    const clearLogBtn = document.getElementById('btn-clear-log');
+
+    if (clearLogBtn) {
+      clearLogBtn.addEventListener('click', () => {
+        log.innerHTML = '';
+      });
+    }
 
     // Экземпляр NostrRelayDiscoveryProvider (ТЗ §7)
     const discovery = new NostrRelayDiscoveryProvider({
@@ -448,7 +532,7 @@
     async function runRelayDiscovery() {
       const statusEl = document.getElementById('relays-status-text');
       const badgeEl = document.getElementById('badge-relays');
-      if (statusEl) statusEl.textContent = '🔍 Проверка релеев (Health Check)...';
+      if (statusEl) statusEl.textContent = '🔍 Checking relays (Health Check)...';
 
       addLog('discovery-pipeline', { action: 'start', timeoutMs: 2000 });
 
@@ -461,7 +545,7 @@
         }
 
         if (statusEl) {
-          statusEl.innerHTML = `<span style="color:#34d399; font-weight:600;">✓ Активно (${selectedRelays.length}):</span> ` +
+          statusEl.innerHTML = `<span style="color:#34d399; font-weight:600;">✓ Active (${selectedRelays.length}):</span> ` +
             selectedRelays.map(r => `<span style="color:#e2e8f0; background:#1e293b; padding:2px 6px; border-radius:4px; font-family:monospace; font-size:11px;">${r.replace('wss://', '')}</span>`).join(' ');
         }
         if (badgeEl) {
@@ -474,12 +558,12 @@
       } catch (err) {
         console.warn('[Discovery] Failed, fallback to configured:', err);
         addLog('⚠️ discovery-fallback', { message: err.message });
-        if (statusEl) statusEl.textContent = 'Используются дефолтные релеи (fallback)';
+        if (statusEl) statusEl.textContent = 'Using default relays (fallback)';
         return null;
       }
     }
 
-    // Запускаем discovery только если страница не открыта для присоединения по URI
+    // Run discovery only if page was not opened with an incoming URI
     const rawHash = decodeURIComponent(window.location.hash || '');
     const rawSearch = decodeURIComponent(window.location.search || '');
     const hasIncomingUri = rawHash.includes('xoip://') || rawSearch.includes('xoip://');
@@ -488,34 +572,33 @@
     } else {
       const statusEl = document.getElementById('relays-status-text');
       const badgeEl = document.getElementById('badge-relays');
-      if (statusEl) statusEl.textContent = 'Используются релеи из входящего URI';
+      if (statusEl) statusEl.textContent = 'Using relays from incoming URI';
       if (badgeEl) {
         badgeEl.textContent = '🔗 Peer Mode';
         badgeEl.className = 'badge badge-green';
       }
     }
 
-    // Кнопка ручного обновления релеев
+    // Refresh relays button
     document.getElementById('btn-discover-relays').addEventListener('click', async () => {
       await runRelayDiscovery();
     });
 
-    // ─── 1. Создание комнаты через xoip:// URI ──────────────────────────────
+    // ─── 1. Create Room via xoip:// URI ──────────────────────────────────────
     document.getElementById('btn-create-uri').addEventListener('click', async () => {
       try {
         addLog('uri-creating', { type: 'nostr' });
-        // Создаем комнату и получаем сессию с xoip:// URI
         await el.createRoom();
       } catch (err) {
         addLog('❌ create-failed', { message: err.message });
       }
     });
 
-    // ─── 2. Подключение по введенному xoip:// URI ───────────────────────────
+    // ─── 2. Connect via entered xoip:// URI ──────────────────────────────────
     document.getElementById('btn-connect-uri').addEventListener('click', async () => {
       const uri = uriInput.value.trim();
       if (!uri) {
-        alert('Вставьте xoip:// URI в поле ввода!');
+        alert('Please paste a xoip:// URI into the input field!');
         return;
       }
       try {
@@ -524,17 +607,17 @@
         await el.connect(uri);
       } catch (err) {
         addLog('❌ connect-failed', { message: err.message });
-        alert('Ошибка подключения по URI: ' + err.message);
+        alert('Connection error via URI: ' + err.message);
       }
     });
 
-    // ─── 3. Копирование xoip:// URI ─────────────────────────────────────────
+    // ─── 3. Copy xoip:// URI ─────────────────────────────────────────────────
     copyUriBtn.addEventListener('click', async () => {
       if (!currentShareURI) return;
       await navigator.clipboard.writeText(currentShareURI);
       addLog('📋 copied-uri', { uri: currentShareURI.slice(0, 35) + '...' });
       const orig = copyUriBtn.textContent;
-      copyUriBtn.textContent = '✅ Скопировано!';
+      copyUriBtn.textContent = '✅ Copied!';
       setTimeout(() => { copyUriBtn.textContent = orig; }, 2000);
     });
 
