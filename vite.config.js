@@ -5,22 +5,29 @@ import fs from 'fs';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
-const qosDir = resolve(__dirname, '../../qos');
+
+// QoS dashboard location: prefer installed @vcomm/xoip-qos package, fallback to local source
+const pkgDashboardDir = resolve(__dirname, 'node_modules/@vcomm/xoip-qos/dist/dashboard');
+const srcDashboardDir = resolve(__dirname, '../../qos/dashboard');
+const qosDashboardDir = fs.existsSync(pkgDashboardDir) ? pkgDashboardDir : srcDashboardDir;
 
 export default defineConfig({
   base: './',
+  optimizeDeps: {
+    // Exclude worker packages from pre-bundling so Web Workers retain proper relative URLs
+    exclude: ['@vcomm/xoip-qos'],
+  },
   resolve: {
     alias: {
-      '@vcomm/qos': resolve(qosDir, 'index.js'),
-      'chart.js': resolve(qosDir, 'node_modules/chart.js'),
-      '/qos/dashboard': resolve(qosDir, 'dashboard'),
+      '@vcomm/qos': '@vcomm/xoip-qos',
+      '/qos/dashboard': qosDashboardDir,
     },
   },
   server: {
     fs: {
       allow: [
         __dirname,
-        qosDir,
+        resolve(__dirname, '../../qos'),
       ],
     },
   },
@@ -36,7 +43,7 @@ export default defineConfig({
             return;
           }
           if (url === '/qos/dashboard/' || url === '/qos/dashboard/index.html') {
-            const htmlPath = resolve(qosDir, 'dashboard/index.html');
+            const htmlPath = resolve(qosDashboardDir, 'index.html');
             if (fs.existsSync(htmlPath)) {
               let html = fs.readFileSync(htmlPath, 'utf8');
               html = html.replace('src="./dashboard.js"', 'src="/qos/dashboard/dashboard.js"');
