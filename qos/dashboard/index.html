@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WebRTC QoS Dashboard v2</title>
+  <style>
+    :root {
+      --bg:      #141414;
+      --panel:   #1e1e1e;
+      --border:  #2a2a2a;
+      --accent:  #3b82f6;
+      --accent2: #10b981;
+      --warn:    #f59e0b;
+      --danger:  #ef4444;
+      --text:    #e2e8f0;
+      --muted:   #94a3b8;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg); color: var(--text);
+      font-family: 'Segoe UI', system-ui, sans-serif; font-size: 13px;
+      display: flex; flex-direction: column; height: 100vh; overflow: hidden;
+    }
+
+    /* Header */
+    .header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 12px 20px; background: var(--panel);
+      border-bottom: 1px solid var(--border); flex-shrink: 0;
+    }
+    .header-left { display: flex; align-items: center; gap: 16px; }
+    .logo { font-size: 15px; font-weight: 700; color: var(--accent); letter-spacing: 1px; }
+    #connectionStatus {
+      font-size: 11px; padding: 3px 10px; border-radius: 20px;
+      background: #2a2a2a; color: var(--muted);
+    }
+
+    /* Tabs */
+    .tab-group {
+      display: flex; gap: 4px;
+      background: var(--bg); border: 1px solid var(--border);
+      border-radius: 8px; padding: 3px;
+    }
+    .tab {
+      padding: 6px 18px; border: none; border-radius: 6px;
+      cursor: pointer; font-size: 12px; font-weight: 600;
+      background: transparent; color: var(--muted); transition: all .15s;
+    }
+    .tab.active { background: var(--accent); color: #fff; }
+    .tab[data-tab="inbound"].active { background: var(--accent2); }
+
+    /* Controls */
+    .controls {
+      display: flex; align-items: center; gap: 16px;
+      padding: 10px 20px; background: var(--panel);
+      border-bottom: 1px solid var(--border); flex-shrink: 0; flex-wrap: wrap;
+    }
+    .ctrl-label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: .5px; }
+    .toggle-switch { position: relative; display: inline-block; width: 38px; height: 20px; }
+    .toggle-switch input { display: none; }
+    .toggle-slider {
+      position: absolute; inset: 0;
+      background: #333; border-radius: 20px; cursor: pointer; transition: .2s;
+    }
+    .toggle-slider::before {
+      content: ''; position: absolute;
+      width: 14px; height: 14px; left: 3px; top: 3px;
+      background: #fff; border-radius: 50%; transition: .2s;
+    }
+    .toggle-switch input:checked + .toggle-slider { background: var(--accent); }
+    .toggle-switch input:checked + .toggle-slider::before { transform: translateX(18px); }
+    button.btn {
+      padding: 5px 14px; border: 1px solid var(--border); border-radius: 6px;
+      background: #2a2a2a; color: var(--text); cursor: pointer;
+      font-size: 12px; transition: background .15s;
+    }
+    button.btn:hover { background: #333; }
+
+    /* Remote bitrate badge */
+    #remoteBitratePanel {
+      display: none; align-items: center; gap: 8px;
+      padding: 4px 12px;
+      background: rgba(245,158,11,.15); border: 1px solid var(--warn);
+      border-radius: 6px; font-size: 11px; color: var(--warn);
+      animation: pulse 1.5s ease-in-out infinite;
+    }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.6} }
+
+    /* Alerts */
+    #alertContainer {
+      position: fixed; top: 80px; right: 20px;
+      display: flex; flex-direction: column; gap: 6px;
+      z-index: 100; pointer-events: none;
+    }
+    .alert {
+      padding: 8px 16px; border-radius: 8px;
+      font-size: 12px; font-weight: 600;
+      animation: slideIn .2s ease; pointer-events: auto;
+    }
+    .alert.warning { background: rgba(245,158,11,.9); color: #000; }
+    .alert.info    { background: rgba(59,130,246,.9);  color: #fff; }
+    .alert.danger  { background: rgba(239,68,68,.9);   color: #fff; }
+    @keyframes slideIn { from{opacity:0;transform:translateX(20px)} to{opacity:1;transform:translateX(0)} }
+
+    /* Stat cards */
+    .stat-cards {
+      display: flex; gap: 10px; padding: 10px 20px; flex-shrink: 0; overflow-x: auto;
+    }
+    .stat-card {
+      background: var(--panel); border: 1px solid var(--border);
+      border-radius: 8px; padding: 10px 16px; min-width: 140px; flex: 1;
+    }
+    .stat-card .label { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: .5px; }
+    .stat-card .value { font-size: 22px; font-weight: 700; color: var(--accent); margin-top: 4px; }
+    .stat-card .unit  { font-size: 11px; color: var(--muted); }
+    .stat-card.inbound-card .value { color: var(--accent2); }
+    .stat-card.warn-card    .value { color: var(--warn); }
+    .stat-card.danger-card  .value { color: var(--danger); }
+
+    /* Charts */
+    .chart-grid {
+      flex: 1; display: grid;
+      grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr;
+      gap: 10px; padding: 0 20px 20px; overflow: hidden;
+    }
+    .chart-panel {
+      background: var(--panel); border: 1px solid var(--border);
+      border-radius: 8px; padding: 10px; position: relative; min-height: 0;
+    }
+    .chart-panel h4 {
+      font-size: 11px; color: var(--muted);
+      text-transform: uppercase; letter-spacing: .5px; margin-bottom: 6px;
+    }
+    .chart-panel canvas { width: 100% !important; height: calc(100% - 24px) !important; }
+
+    /* Tab views */
+    .tab-view { display: none; flex-direction: column; flex: 1; overflow: hidden; min-height: 0; }
+    .tab-view.active { display: flex; }
+
+    /* Action badge */
+    #actionBadge {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 3px 12px; border-radius: 20px;
+      font-size: 11px; font-weight: 700; background: #2a2a2a; color: var(--muted);
+    }
+  </style>
+</head>
+<body>
+
+<div id="alertContainer"></div>
+
+<!-- Header -->
+<div class="header">
+  <div class="header-left">
+    <div class="logo">📊 QoS Dashboard v2</div>
+    <div id="connectionStatus">Waiting for data…</div>
+    <div id="actionBadge">— MAINTAIN</div>
+  </div>
+  <div class="tab-group" id="streamTabs">
+    <button class="tab active" data-tab="outbound" id="tabOutbound">↑ Upload (Outbound)</button>
+    <button class="tab"        data-tab="inbound"  id="tabInbound" >↓ Download (Inbound)</button>
+  </div>
+  <div id="remoteBitratePanel">
+    <span>📡</span>
+    <span id="remoteBitrateText">Requesting remote reduce…</span>
+  </div>
+</div>
+
+<!-- Controls -->
+<div class="controls">
+  <div style="display:flex;align-items:center;gap:8px;">
+    <span class="ctrl-label">Decision Engine</span>
+    <label class="toggle-switch">
+      <input type="checkbox" id="decisionEngineToggle" checked>
+      <span class="toggle-slider"></span>
+    </label>
+  </div>
+  <button class="btn" id="downloadBtn">⬇ Export Session</button>
+  <div style="margin-left:auto;display:flex;align-items:center;gap:8px;">
+    <span class="ctrl-label">Session:</span>
+    <span id="sessionIdLabel" style="color:var(--muted);font-size:11px;">—</span>
+  </div>
+</div>
+
+<!-- ── OUTBOUND TAB ── -->
+<div class="tab-view active" id="view-outbound">
+  <div class="stat-cards">
+    <div class="stat-card">
+      <div class="label">Bitrate</div>
+      <div class="value" id="out-bitrate">0</div>
+      <div class="unit">kbps</div>
+    </div>
+    <div class="stat-card warn-card">
+      <div class="label">Packet Loss</div>
+      <div class="value" id="out-loss">0</div>
+      <div class="unit">%</div>
+    </div>
+    <div class="stat-card">
+      <div class="label">RTT</div>
+      <div class="value" id="out-rtt">0</div>
+      <div class="unit">ms</div>
+    </div>
+    <div class="stat-card">
+      <div class="label">Jitter</div>
+      <div class="value" id="out-jitter">0</div>
+      <div class="unit">ms</div>
+    </div>
+    <div class="stat-card">
+      <div class="label">Encode Time</div>
+      <div class="value" id="out-encode">0</div>
+      <div class="unit">ms</div>
+    </div>
+  </div>
+  <div class="chart-grid">
+    <div class="chart-panel"><h4>Bitrate &amp; Loss</h4><canvas id="outNetChart"></canvas></div>
+    <div class="chart-panel"><h4>RTT &amp; Jitter</h4><canvas id="outLatencyChart"></canvas></div>
+    <div class="chart-panel"><h4>Encode Performance</h4><canvas id="outPerfChart"></canvas></div>
+    <div class="chart-panel"><h4>QoS Action Signal</h4><canvas id="outActionChart"></canvas></div>
+  </div>
+</div>
+
+<!-- ── INBOUND TAB ── -->
+<div class="tab-view" id="view-inbound">
+  <div class="stat-cards">
+    <div class="stat-card inbound-card">
+      <div class="label">Recv Bitrate</div>
+      <div class="value" id="in-bitrate">0</div>
+      <div class="unit">kbps</div>
+    </div>
+    <div class="stat-card warn-card">
+      <div class="label">Recv Loss</div>
+      <div class="value" id="in-loss">0</div>
+      <div class="unit">%</div>
+    </div>
+    <div class="stat-card inbound-card">
+      <div class="label">Decode Time</div>
+      <div class="value" id="in-decode">0</div>
+      <div class="unit">ms</div>
+    </div>
+    <div class="stat-card warn-card">
+      <div class="label">Freeze Count</div>
+      <div class="value" id="in-freeze">0</div>
+      <div class="unit">total</div>
+    </div>
+    <div class="stat-card inbound-card">
+      <div class="label">Audio Concealment</div>
+      <div class="value" id="in-conceal">0.0</div>
+      <div class="unit">%</div>
+    </div>
+  </div>
+  <div class="chart-grid">
+    <div class="chart-panel"><h4>Incoming Bitrate</h4><canvas id="inBitrateChart"></canvas></div>
+    <div class="chart-panel"><h4>Receive Loss %</h4><canvas id="inLossChart"></canvas></div>
+    <div class="chart-panel"><h4>Decode Time (ms)</h4><canvas id="inDecodeChart"></canvas></div>
+    <div class="chart-panel"><h4>Audio Concealment %</h4><canvas id="inConcealChart"></canvas></div>
+  </div>
+</div>
+
+<script type="module" src="./dashboard.js"></script>
+</body>
+</html>
