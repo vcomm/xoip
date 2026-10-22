@@ -644,6 +644,13 @@
     // ─── 6. Открыть QoS Dashboard (Click: Window, Ctrl/Cmd+Click: New Tab) ──
     const btnOpenDashboard = document.getElementById('btn-open-dashboard');
     if (btnOpenDashboard) {
+      // Установить корректный URL дашборда с учётом base URL (важно для GitHub Pages /xoip/)
+      const qosEl = document.querySelector('xoip-qos');
+      if (qosEl) {
+        const base = import.meta.env.BASE_URL || '/';
+        const dashboardUrl = base.endsWith('/') ? base + 'qos/dashboard/' : base + '/qos/dashboard/';
+        qosEl.setAttribute('dashboard-url', dashboardUrl);
+      }
       btnOpenDashboard.addEventListener('click', (e) => {
         const qos = document.querySelector('xoip-qos');
         if (qos) {

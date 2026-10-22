@@ -11,6 +11,20 @@ const pkgDashboardDir = resolve(__dirname, 'node_modules/@vcomm/xoip-qos/dist/da
 const srcDashboardDir = resolve(__dirname, '../../qos/dashboard');
 const qosDashboardDir = fs.existsSync(pkgDashboardDir) ? pkgDashboardDir : srcDashboardDir;
 
+function copyDirSync(src, dest) {
+  fs.mkdirSync(dest, { recursive: true });
+  for (const entry of fs.readdirSync(src, { withFileTypes: true })) {
+    if (entry.name.startsWith('._')) continue;
+    const srcPath = resolve(src, entry.name);
+    const destPath = resolve(dest, entry.name);
+    if (entry.isDirectory()) {
+      copyDirSync(srcPath, destPath);
+    } else {
+      fs.copyFileSync(srcPath, destPath);
+    }
+  }
+}
+
 export default defineConfig({
   base: './',
   optimizeDeps: {
@@ -33,7 +47,9 @@ export default defineConfig({
   },
   plugins: [
     {
-      name: 'serve-qos-dashboard',
+      name: 'qos-dashboard-plugin',
+
+      // ── Dev server: serve dashboard at /qos/dashboard/ ──────────────
       configureServer(server) {
         server.middlewares.use(async (req, res, next) => {
           const url = req.url.split('?')[0];
@@ -55,6 +71,26 @@ export default defineConfig({
           }
           next();
         });
+      },
+
+      // ── Production build: copy dashboard into dist/qos/dashboard/ ──
+      closeBundle() {
+        const outDir = resolve(__dirname, 'dist', 'qos', 'dashboard');
+        if (fs.existsSync(qosDashboardDir)) {
+          copyDirSync(qosDashboardDir, outDir);
+          console.log(`[qos-dashboard-plugin] Copied dashboard → dist/qos/dashboard/`);
+        } else {
+          console.warn('[qos-dashboard-plugin] Dashboard source not found:', qosDashboardDir);
+        }
+
+        // Copy config.js into dist/qos/config.js because dashboard.js imports '../config.js'
+        const qosDistDir = resolve(__dirname, 'node_modules/@vcomm/xoip-qos/dist');
+        const configSrc = resolve(qosDistDir, 'config.js');
+        const configDest = resolve(__dirname, 'dist', 'qos', 'config.js');
+        if (fs.existsSync(configSrc)) {
+          fs.copyFileSync(configSrc, configDest);
+          console.log(`[qos-dashboard-plugin] Copied config.js → dist/qos/config.js`);
+        }
       },
     },
   ],
