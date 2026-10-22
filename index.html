@@ -381,18 +381,20 @@
         flex-direction: column;
         width: 100%;
       }
+
       .sidebar-column {
         width: 100%;
         min-width: 0;
         position: static;
       }
+
       #event-log {
         height: 320px;
         max-height: 360px;
       }
     }
   </style>
-  <script type="module" crossorigin src="./assets/index-BwFWBAf2.js"></script>
+  <script type="module" crossorigin src="./assets/index-yMD5ft9L.js"></script>
 </head>
 
 <body>
@@ -428,7 +430,8 @@
               <span style="color: #a855f7; font-weight: 600;">📡 Nostr Relay Discovery:</span>
               <span id="relays-status-text" style="color: #cbd5e1;">Discovering active relays (Health Check)...</span>
             </div>
-            <button class="action-btn" id="btn-discover-relays" style="padding: 5px 12px; font-size: 11px;">🔄 Refresh Relays</button>
+            <button class="action-btn" id="btn-discover-relays" style="padding: 5px 12px; font-size: 11px;">🔄 Refresh
+              Relays</button>
           </div>
 
           <div class="uri-actions">
@@ -436,6 +439,9 @@
             <button class="action-btn" id="btn-copy-uri" disabled>📋 Copy xoip:// URI</button>
             <button class="action-btn" id="btn-open-peer">👥 Open Peer Tab (New Tab)</button>
             <button class="action-btn" id="btn-send-ping">💬 DataChannel Ping</button>
+            <button class="action-btn" id="btn-open-dashboard"
+              title="Click: Popup | Ctrl+Click: New Tab"
+              onclick="document.querySelector('xoip-qos')?.openDashboard(event)">📈 QoS Dashboard</button>
           </div>
 
           <div class="uri-input-group">
@@ -464,6 +470,7 @@
         }' ice-servers='[
           { "urls": ["stun:stun1.l.google.com:19302", "stun:stun2.l.google.com:19302"] }
         ]' multi-camera e2ee-enabled></xoip-call>
+      <xoip-qos for="xoip" monitor-inbound decision-engine auto-start></xoip-qos>
     </main>
 
     <!-- Правая колонка: Live Events Log -->
@@ -478,7 +485,7 @@
     </aside>
   </div>
 
-  <!-- Подключение компонента xoip-call -->
+  <!-- Подключение qos SDK и компонента xoip-call -->
 </body>
 
 </html>
